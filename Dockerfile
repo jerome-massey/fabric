@@ -20,32 +20,31 @@ WORKDIR /app
 
 # Create a non-privileged user that the app will run under.
 # See https://docs.docker.com/go/dockerfile-user-best-practices/
-ARG UID=10001
-RUN adduser \
-    --disabled-password \
-    --gecos "" \
-    --home "/nonexistent" \
-    --shell "/sbin/nologin" \
-    --no-create-home \
-    --uid "${UID}" \
-    appuser
+# ARG UID=10001
+# RUN adduser \
+#     --disabled-password \
+#     --gecos "" \
+#     --home "/nonexistent" \
+#     --shell "/sbin/nologin" \
+#     --no-create-home \
+#     --uid "${UID}" \
+#     appuser
 
 # Install applications and dependencies
 RUN apt update && apt install -y --no-install-recommends\
     pipx \
+    ffmpeg \
     && \
-    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
-    pipx install .
-
-
-# Switch to the non-privileged user to run the application.
-USER appuser
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* 
 
 # Copy the source code into the container.
 COPY . .
 
-# Expose the port that the application listens on.
-# EXPOSE 8000
+# Install the application's dependencies.
+RUN pipx install .
+
+# Setup path environment variable
+ENV PATH="/root/.local/bin:${PATH}"
 
 # Run the application.
-# CMD gunicorn 'installer.server.api.fabric_api_server:app' --bind=0.0.0.0:8000
+CMD ["sleep", "infinity"]
